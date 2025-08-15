@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ES2021",
+    "types": ["node"],
+    "rootDirs": ["src", "../shared/src"],
+    "paths": {
+      "@zorva/shared": ["../shared/src/index.ts"],
+      "@zorva/shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src"]
+}

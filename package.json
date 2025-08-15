@@ -1,0 +1,25 @@
+{
+  "name": "zorva-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "client-app",
+    "driver-app",
+    "admin-app",
+    "server",
+    "shared"
+  ],
+  "engines": {
+    "node": ">=18.18.0",
+    "npm": ">=9"
+  },
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:admin": "npm run dev -w admin-app",
+    "dev:client": "npm run start -w client-app",
+    "dev:driver": "npm run start -w driver-app",
+    "build": "npm run build -w shared && npm run build -w server && npm run build -w admin-app",
+    "lint": "echo 'Add linters later'",
+    "test": "echo 'Add tests later'"
+  }
+}
