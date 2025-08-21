@@ -1,0 +1,1 @@
+export const theme = { colors: { bg: "#0f172a", card: "#111827", primary: "#22c55e", text: "#e5e7eb" } };

@@ -14,11 +14,13 @@
     "npm": ">=9"
   },
   "scripts": {
+    "postinstall": "npm run build -w shared",
     "dev:server": "npm run dev -w server",
-    "dev:admin": "npm run dev -w admin-app",
     "dev:client": "npm run start -w client-app",
     "dev:driver": "npm run start -w driver-app",
-    "build": "npm run build -w shared && npm run build -w server && npm run build -w admin-app",
+    "dev:admin": "npm run dev -w admin-app",
+    "build": "npm run build -w shared && npm run build -w client-app && npm run build -w driver-app && npm run build -w admin-app && npm run build -w server",
+    "start": "npm run dev:server",
     "lint": "echo 'Add linters later'",
     "test": "echo 'Add tests later'"
   }
