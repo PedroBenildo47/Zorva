@@ -4,6 +4,9 @@ import ordersRouter from "./orders";
 import messagesRouter from "./messages";
 import { stripeWebhookHandler } from "../controllers/webhooks.stripe";
 import deviceTokensRouter from "./devicetokens";
+import storesRouter from "./stores";
+import productsRouter from "./products";
+import driversRouter from "./drivers";
 export function registerRoutes(app) {
     // Stripe webhook must receive the raw body
     app.post("/api/webhooks/stripe", express.raw({ type: "application/json" }), stripeWebhookHandler);
@@ -12,4 +15,7 @@ export function registerRoutes(app) {
     app.use("/api/orders", ordersRouter);
     app.use("/api/messages", messagesRouter);
     app.use("/api/device-tokens", deviceTokensRouter);
+    app.use("/api/stores", storesRouter);
+    app.use("/api/products", productsRouter);
+    app.use("/api/drivers", driversRouter);
 }
