@@ -1,0 +1,10 @@
+{
+  "welcome": "Welcome to Zorva",
+  "login": "Login",
+  "signup": "Sign up",
+  "continue_guest": "Continue as Guest",
+  "add_to_cart": "Add to cart",
+  "checkout": "Checkout",
+  "orders": "Orders",
+  "profile": "Profile"
+}
