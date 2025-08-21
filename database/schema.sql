@@ -120,3 +120,86 @@ create policy if not exists "Store manages own products" on public.products for 
 create policy if not exists "Users read their deliveries" on public.deliveries for select using (
 	exists (select 1 from public.orders o where o.id = order_id and (o.customer_id = auth.uid() or o.driver_id = auth.uid()))
 );
+
+-- OTP codes for phone/email verification and password reset
+create table if not exists public.otp_codes (
+	id uuid primary key default gen_random_uuid(),
+	user_id uuid references public.users(id) on delete cascade,
+	destination text not null,
+	code text not null,
+	purpose text not null check (purpose in ('login','verify','reset_password')),
+	expires_at timestamp with time zone not null,
+	consumed_at timestamp with time zone
+);
+create index if not exists idx_otp_destination on public.otp_codes(destination);
+
+-- Carts and items
+create table if not exists public.carts (
+	id uuid primary key default gen_random_uuid(),
+	user_id uuid not null references public.users(id) on delete cascade,
+	store_id uuid references public.stores(id) on delete set null,
+	created_at timestamp with time zone default now(),
+	updated_at timestamp with time zone default now()
+);
+create table if not exists public.cart_items (
+	id uuid primary key default gen_random_uuid(),
+	cart_id uuid not null references public.carts(id) on delete cascade,
+	product_id uuid not null references public.products(id),
+	quantity integer not null check (quantity > 0),
+	price_cents integer not null
+);
+create index if not exists idx_cart_items_cart on public.cart_items(cart_id);
+
+-- Payments
+create table if not exists public.payments (
+	id uuid primary key default gen_random_uuid(),
+	order_id uuid unique not null references public.orders(id) on delete cascade,
+	provider text not null check (provider in ('stripe','paypal','multicaixa','cod')),
+	status text not null check (status in ('initiated','requires_action','succeeded','failed','refunded')) default 'initiated',
+	amount integer not null,
+	provider_reference text,
+	created_at timestamp with time zone default now(),
+	updated_at timestamp with time zone default now()
+);
+
+-- Audit logs
+create table if not exists public.audit_logs (
+	id uuid primary key default gen_random_uuid(),
+	actor_user_id uuid references public.users(id) on delete set null,
+	action text not null,
+	entity text,
+	entity_id uuid,
+	metadata jsonb,
+	created_at timestamp with time zone default now()
+);
+create index if not exists idx_audit_actor on public.audit_logs(actor_user_id);
+
+-- Loyalty points
+create table if not exists public.loyalty_points (
+	id uuid primary key default gen_random_uuid(),
+	user_id uuid not null references public.users(id) on delete cascade,
+	points integer not null,
+	reason text,
+	created_at timestamp with time zone default now()
+);
+
+-- Promotions / campaigns
+create table if not exists public.promotions (
+	id uuid primary key default gen_random_uuid(),
+	title text not null,
+	description text,
+	store_id uuid references public.stores(id) on delete set null,
+	coupon_id uuid references public.coupons(id) on delete set null,
+	starts_at timestamp with time zone,
+	ends_at timestamp with time zone,
+	is_active boolean default true
+);
+
+-- Enable RLS for new tables
+alter table public.otp_codes enable row level security;
+alter table public.carts enable row level security;
+alter table public.cart_items enable row level security;
+alter table public.payments enable row level security;
+alter table public.audit_logs enable row level security;
+alter table public.loyalty_points enable row level security;
+alter table public.promotions enable row level security;

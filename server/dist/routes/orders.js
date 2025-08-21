@@ -26,6 +26,8 @@ const createOrder = z.object({
     origin: z.object({ lat: z.number(), lng: z.number(), address: z.string().optional() }),
     destination: z.object({ lat: z.number(), lng: z.number(), address: z.string().optional() }),
     payment_method: z.enum(["card", "cash"]),
+    store_id: z.string().uuid().optional(),
+    items: z.array(z.object({ product_id: z.string().uuid(), quantity: z.number().int().positive(), price_cents: z.number().int().positive() })).optional()
 });
 router.post("/", async (req, res) => {
     const parsed = createOrder.safeParse(req.body);
@@ -45,11 +47,15 @@ router.post("/", async (req, res) => {
             destination,
             payment_method: parsed.data.payment_method,
             distance_km: price.distanceKm,
+            store_id: parsed.data.store_id,
         })
             .select("*")
             .single();
         if (error)
             return res.status(500).json({ error: error.message });
+        if (parsed.data.items?.length) {
+            await supabase.from("order_items").insert(parsed.data.items.map(i => ({ ...i, order_id: data.id })));
+        }
         res.status(201).json({ order: data });
     }
     catch (e) {
@@ -58,6 +64,7 @@ router.post("/", async (req, res) => {
 });
 const updateStatus = z.object({ status: z.enum(["pending", "accepted", "enroute", "delivered", "canceled"]) });
 router.patch("/:id/status", async (req, res) => {
+    const io = req.app.get("io");
     const id = req.params.id;
     const parsed = updateStatus.safeParse(req.body);
     if (!parsed.success)
@@ -67,6 +74,7 @@ router.patch("/:id/status", async (req, res) => {
         const { data, error } = await supabase.from("orders").update({ status: parsed.data.status }).eq("id", id).select("*").single();
         if (error)
             return res.status(500).json({ error: error.message });
+        io?.to(`order:${id}`).emit("order-status", data.status);
         res.json({ order: data });
     }
     catch (e) {
