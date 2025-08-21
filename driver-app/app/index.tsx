@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Button, FlatList, StyleSheet } from "react-native";
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 
 interface OrderRow { id: string; status: string; amount: number }
 
@@ -12,15 +12,20 @@ export default function Index() {
 		try {
 			const res = await fetch(process.env.EXPO_PUBLIC_API_URL + "/api/orders");
 			const json = await res.json();
-			setOrders((json.orders ?? []).slice(0, 10));
+			setOrders((json.orders ?? []).slice(0, 20));
 		} catch (e) { console.error(e); } finally { setLoading(false); }
+	}
+
+	async function accept(id: string) {
+		await fetch(process.env.EXPO_PUBLIC_API_URL + `/api/orders/${id}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "accepted" }) });
+		await load();
 	}
 
 	useEffect(() => { load(); }, []);
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Pedidos recentes</Text>
+			<Text style={styles.title}>Pedidos disponíveis</Text>
 			{loading ? <Text>Carregando...</Text> : (
 				<FlatList
 					data={orders}
@@ -29,7 +34,9 @@ export default function Index() {
 						<View style={styles.listItem}>
 							<Text style={{ flex: 1 }}>{item.id.slice(0,8)} • {item.status}</Text>
 							<Text>R$ {(item.amount / 100).toFixed(2)}</Text>
-							<Button title="Aceitar" onPress={() => {}} />
+							<TouchableOpacity style={styles.btn} onPress={() => accept(item.id)}>
+								<Text style={styles.btnText}>Aceitar</Text>
+							</TouchableOpacity>
 						</View>
 					)}
 				/>
@@ -40,7 +47,9 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, padding: 24, gap: 12, paddingTop: 64 },
-	title: { fontSize: 24, fontWeight: "600" },
-	listItem: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 }
+	container: { flex: 1, padding: 24, gap: 12, paddingTop: 64, backgroundColor: "#0f172a" },
+	title: { fontSize: 24, fontWeight: "600", color: "#fff" },
+	listItem: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8, backgroundColor: "#111827", padding: 12, borderRadius: 12 },
+	btn: { backgroundColor: "#22c55e", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 },
+	btnText: { color: "#fff", fontWeight: "700" }
 });

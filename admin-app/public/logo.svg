@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect rx="10" width="200" height="60" fill="#0f172a"/>
+  <text x="20" y="38" font-family="Segoe UI, Roboto, Arial" font-weight="700" font-size="28" fill="url(#g)">ZORVA</text>
+  <circle cx="160" cy="30" r="10" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+  <path d="M160 20 L165 25 L160 30 L155 25 Z" fill="#38bdf8"/>
+</svg>
